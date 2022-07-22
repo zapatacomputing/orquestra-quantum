@@ -9,11 +9,11 @@ import numpy as np
 from orquestra.quantum.circuits import Circuit
 
 from ..measurements import ExpectationValues
-from ..openfermion import SymbolicOperator
+from ..wip.operators import PauliRepresentation, PauliSum, PauliTerm
 from .backend import QuantumBackend
 
 
-@dataclass(frozen=True)
+@dataclass
 class EstimationTask:
     """
     Data class defining an estimation problem.
@@ -25,9 +25,17 @@ class EstimationTask:
             e.g. number of shots or target accuracy.
     """
 
-    operator: SymbolicOperator
-    circuit: Circuit
-    number_of_shots: Optional[int]
+    def __init__(
+        self,
+        operator: PauliRepresentation,
+        circuit: Circuit,
+        number_of_shots: Optional[int],
+    ):
+        if isinstance(operator, PauliTerm):
+            operator = PauliSum([operator])
+        self.operator = operator
+        self.circuit = circuit
+        self.number_of_shots = number_of_shots
 
 
 class EstimationPreprocessor(Protocol):
